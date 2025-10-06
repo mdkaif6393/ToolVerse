@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  # Redis for real-time data and caching
+  redis:
+    image: redis:7-alpine
+    container_name: crafta-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Python Analytics Service
+  analytics-service:
+    build:
+      context: ./analytics-service
+      dockerfile: Dockerfile
+    container_name: crafta-analytics
+    ports:
+      - "8001:8001"
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=sqlite:///data/analytics.db
+      - LOG_LEVEL=INFO
+    volumes:
+      - analytics_data:/app/data
+      - ./analytics-service:/app
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8001/api/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  # Node.js Backend (existing)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: crafta-backend
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - ANALYTICS_SERVICE_URL=http://analytics-service:8001
+      - REDIS_URL=redis://redis:6379
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    depends_on:
+      - analytics-service
+      - redis
+    restart: unless-stopped
+
+volumes:
+  redis_data:
+    driver: local
+  analytics_data:
+    driver: local
+
+networks:
+  default:
+    name: crafta-network

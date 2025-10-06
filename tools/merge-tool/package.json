@@ -1,0 +1,54 @@
+{
+  "name": "pdf-merge-tool",
+  "version": "1.0.0",
+  "description": "PDF Merger Tool - Combine multiple PDF documents into a single file",
+  "main": "backend/index.js",
+  "scripts": {
+    "start": "node backend/index.js",
+    "dev": "nodemon backend/index.js",
+    "build": "tsc",
+    "test": "jest"
+  },
+  "keywords": [
+    "pdf",
+    "merge",
+    "combine",
+    "documents",
+    "tool"
+  ],
+  "author": "Crafta Suite",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "multer": "^1.4.5-lts.1",
+    "pdf-lib": "^1.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1",
+    "jest": "^29.6.2",
+    "@types/node": "^20.8.0"
+  },
+  "toolConfig": {
+    "name": "PDF Merger",
+    "category": "PDF Tools",
+    "description": "Combine multiple PDF documents into a single file",
+    "icon": "merge",
+    "version": "1.0.0",
+    "endpoints": {
+      "backend": "/api/tools/merge-tool",
+      "frontend": "/tools/merge-tool"
+    },
+    "features": [
+      "Merge multiple PDFs",
+      "Drag & drop interface",
+      "File validation",
+      "Progress tracking",
+      "Automatic download"
+    ],
+    "requirements": {
+      "maxFiles": 10,
+      "maxFileSize": "50MB",
+      "supportedFormats": ["application/pdf"]
+    }
+  }
+}
